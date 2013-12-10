@@ -48,6 +48,7 @@ install:
     fi
   - sudo luarocks install lunitx
   - sudo luarocks install lua-path
+  - sudo luarocks install luafilesystem
   - sudo luarocks make rockspecs/lzmq-auth-scm-0.rockspec
 
 script:
