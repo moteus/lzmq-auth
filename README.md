@@ -1,5 +1,6 @@
 lzmq-auth
 =========
+[![Build Status](https://travis-ci.org/moteus/lzmq-auth.png?branch=master)](https://travis-ci.org/moteus/lzmq-auth)
 
 Implementaion of czmq zauth class
 

@@ -39,13 +39,33 @@ before_install:
   - cd $TRAVIS_BUILD_DIR
 
 install:
-  - sudo apt-get install libzmq3
+
+  # install libsodium
+  - git clone git://github.com/jedisct1/libsodium.git
+  - cd libsodium
+  - ./autogen.sh
+  - ./configure && make check
+  - sudo make install
+  - sudo ldconfig
+
+  # install libzmq
+  - cd $TRAVIS_BUILD_DIR
+  - sudo apt-get remove libzmq3
+  - git clone https://github.com/zeromq/zeromq4-x.git ./zeromq4
+  - cd ./zeromq4;
+  - ./autogen.sh;
+  - ./configure;
+  - sudo make;
+  - sudo make install;
+
+  - cd $TRAVIS_BUILD_DIR
+  # install lzmq
   - if [ $LUA = "luajit" ]; then
       sudo luarocks install https://raw.github.com/moteus/lzmq/master/rockspecs/lzmq-ffi-scm-0.rockspec;
     else
-      sudo apt-get install libzmq3-dev;
       sudo luarocks install https://raw.github.com/moteus/lzmq/master/rockspecs/lzmq-scm-0.rockspec;
     fi
+
   - sudo luarocks install lunitx
   - sudo luarocks install lua-path
   - sudo luarocks install luafilesystem
