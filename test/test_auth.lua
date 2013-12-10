@@ -1,3 +1,4 @@
+local HAS_RUNNER = not not lunit
 local lunit      = require "lunit"
 local TEST_CASE  = assert(lunit.TEST_CASE)
 local skip       = lunit.skip or function() end

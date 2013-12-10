@@ -69,6 +69,7 @@ install:
   - sudo luarocks install lunitx
   - sudo luarocks install lua-path
   - sudo luarocks install luafilesystem
+  - sudo luarocks install https://raw.github.com/Neopallium/lua-llthreads/master/rockspecs/lua-llthreads-scm-0.rockspec
   - sudo luarocks make rockspecs/lzmq-auth-scm-0.rockspec
 
 script:
