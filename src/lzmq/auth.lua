@@ -14,6 +14,15 @@ function zauth:new(ctx)
   return o
 end
 
+function zauth:destroy()
+  if self.private_ then
+    self:stop()
+    self.private_ = nil
+  end
+end
+
+zauth.__gc = zauth.destroy
+
 function zauth:started()
   return not not self.private_.thread
 end
