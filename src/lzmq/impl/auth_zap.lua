@@ -269,4 +269,8 @@ end
 
 loop:start()
 
+log("I: auth ZAP loop interrupted")
+
+ctx:destroy()
+
 end
