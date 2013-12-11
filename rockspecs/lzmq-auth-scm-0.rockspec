@@ -24,8 +24,8 @@ build = {
   type = "builtin",
 
   modules = {
-    ["lzmq.auth"           ] = "src/lzmq/auth.lua";
-    ["lzmq.cert"           ] = "src/lzmq/cert.lua";
-    ["lzmq.impl.auth_zap"  ] = "src/lzmq/impl/auth_zap.lua";
+    ["lzmq.auth"           ] = "src/lua/auth.lua";
+    ["lzmq.cert"           ] = "src/lua/cert.lua";
+    ["lzmq.impl.auth_zap"  ] = "src/lua/impl/auth_zap.lua";
   },
 }

@@ -5,7 +5,7 @@ INITLAKEFILE()
 target('build', {})
 
 install = target('install', {
-  file.group{odir=J(LUADIR, PROJECT); src = J('src', 'lzmq', '*'); recurse = true };
+  file.group{odir=J(LUADIR, PROJECT); src = J('src', 'lua', '*'); recurse = true };
   file.group{odir=TESTDIR;            src = J('test', '*');        recurse = true };
 })
 
