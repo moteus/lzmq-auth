@@ -67,11 +67,6 @@ function zcert:apply(zsocket)
   zsocket:set_curve_publickey(self:public_key());
 end
 
-function zcert:apply(zsocket)
-  zsocket:set_curve_secretkey(self:secret_key())
-  zsocket:set_curve_publickey(self:public_key());
-end
-
 function zcert:dup()
   local meta = {}
   for k, v in pairs(self.private_.metadata) do meta[k] = v end
