@@ -107,7 +107,21 @@ function test_plain()
   server:set_plain_server(1)
   client:set_plain_username("admin")
   client:set_plain_password("Password")
-  auth:configure_plain("*", pass_path);
+  auth:configure_plain("*", pass_path)
+
+  assert_true(test_connect())
+end
+
+function test_plain_default_domain()
+  local password  = assert(io.open(pass_path, "w+"))
+  password:write("admin=Password\n")
+  password:close()
+
+  server:set_plain_server(1)
+  client:set_plain_username("admin")
+  client:set_plain_password("Password")
+  assert_error(function() auth:configure_plain(pass_path, nil) end)
+  auth:configure_plain(pass_path)
 
   assert_true(test_connect())
 end
@@ -159,6 +173,27 @@ function test_curve()
   client:set_curve_serverkey(server_key)
   client_cert:save_public(path.join(TESTDIR, "mycert.key"))
   auth:configure_curve("*", TESTDIR)
+
+  assert_true(test_connect())
+end
+
+function test_curve_default_domain()
+  -- Try CURVE authentication
+  -- We'll create two new certificates and save the client public
+  -- certificate on disk; in a real case we'd transfer this securely
+  -- from the client machine to the server machine.
+  local server_cert = zcert.new()
+  local client_cert = zcert.new()
+  local server_key  = server_cert:public_key(true)
+
+  -- Test full client authentication using certificates
+  server_cert:apply(server)
+  client_cert:apply(client)
+  server:set_curve_server(1)
+  client:set_curve_serverkey(server_key)
+  client_cert:save_public(path.join(TESTDIR, "mycert.key"))
+  assert_error(function() auth:configure_curve(TESTDIR, nil) end)
+  auth:configure_curve(TESTDIR)
 
   assert_true(test_connect())
 end

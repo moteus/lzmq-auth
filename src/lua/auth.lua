@@ -71,14 +71,25 @@ function zauth:verbose(...)
   return pipe:recv()
 end
 
-function zauth:configure_plain(domain, passwords)
-  local pipe = self.private_.pipe
+function zauth:configure_plain(...)
+  local domain, passwords
+  if select('#', ...) < 2 then passwords = ...
+  else  domain, passwords = ... end
   domain = domain or '*'
+  assert(passwords)
+
+  local pipe = self.private_.pipe
   pipe:sendx('PLAIN', domain, passwords)
   return pipe:recv()
 end
 
-function zauth:configure_curve(domain, location)
+function zauth:configure_curve(...)
+  local domain, location
+  if select('#', ...) < 2 then location = ...
+  else  domain, location = ... end
+  domain = domain or '*'
+  assert(location)
+
   local pipe = self.private_.pipe
   pipe:sendx('CURVE', domain or '*', location)
   return pipe:recv()
