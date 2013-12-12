@@ -8,6 +8,7 @@ local pipe     = ...
 
 local CURVE_ALLOW_ANY = "*"
 
+local loop
 local whitelist = {}
 local blacklist = {}
 local passwords = {}
@@ -76,9 +77,7 @@ local function send_zap(sok, req, status, text)
   return sok:send_all{"1.0", req.sequence, status, text, "", ""}
 end
 
-local loop = zloop.new(2, ctx)
-
-do -- auth
+local on_auth do -- auth
 
 local function auth_plain(domain, username, password)
   if (not domain) or (domain == '') then domain = '*' end
@@ -147,7 +146,7 @@ end
 
 -- Setup auth handler
 -- http://rfc.zeromq.org/spec:27
-zmq.assert(loop:add_new_bind(zmq.REP, "inproc://zeromq.zap.01", function(sok)
+on_auth = function(sok)
   local msg = recv_zap(sok)
   if not msg then return end
 
@@ -200,11 +199,11 @@ zmq.assert(loop:add_new_bind(zmq.REP, "inproc://zeromq.zap.01", function(sok)
   else
     send_zap(sok, msg, "400", reason)
   end
-end))
+end
 
 end
 
-do -- front end API
+local on_pipe do -- front end API
 
 local API = {} do
 
@@ -251,8 +250,7 @@ end
 
 end
 
--- pipe handler
-zmq.assert(loop:add_socket(pipe, function(sok)
+on_pipe = function(sok)
   local msg = sok:recv_all()
   if not msg then return loop:interrupt() end
   local cmd = msg[1]
@@ -263,14 +261,51 @@ zmq.assert(loop:add_socket(pipe, function(sok)
   end
   local res = fn(msg)
   if res then sok:send(res) end
-end))
+end
 
 end
 
-loop:start()
+do -- main loop
 
-log("I: auth ZAP loop interrupted")
+local ok, err
 
-ctx:destroy()
+repeat
 
+loop, err = zloop.new(2, ctx)
+if not loop then
+  err = "can not create zmq.loop: " .. tostring(err)
+  break
+end
+
+ok, err = loop:add_new_bind(zmq.REP, "inproc://zeromq.zap.01", on_auth)
+if not ok then
+  err = "can not bind to ZAP interface: " .. tostring(err)
+  break
+end
+
+ok, err = loop:add_socket(pipe, on_pipe)
+if not ok then
+  err = "can not start poll pipe socket: " .. tostring(err)
+  break
+end
+
+until true
+
+if ok then
+  pipe:send("OK")
+
+  log("I: start auth ZAP loop")
+  loop:start()
+  log("I: auth ZAP loop interrupted")
+
+else
+  log("E: " .. tostring(err))
+  pipe:sendx("ERROR", tostring(err))
+end
+
+end
+
+ctx:destroy(100)
+
+log("I: ZAP thread done!")
 end

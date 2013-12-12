@@ -24,7 +24,7 @@ local _ENV = TEST_CASE "lzmq.auth" do
 
 local TESTDIR   = ".test_auth"
 local pass_path = path.join(TESTDIR, "password-file")
-local auth, ctx, server, client
+local auth, ctx, server, client, auth2
 
 local function test_connect()
   local port_nbr = assert_number(dyn_bind(server, "tcp://127.0.0.1"))
@@ -54,6 +54,7 @@ function teardown()
   if client then client:close() end
   if server then server:close() end
   if auth   then auth:stop()    end
+  if auth2  then auth2:stop()   end
   if ctx    then ctx:destroy()  end
 
   path.each(path.join(TESTDIR, "*.*"), path.remove)
@@ -196,6 +197,12 @@ function test_curve_default_domain()
   auth:configure_curve(TESTDIR)
 
   assert_true(test_connect())
+end
+
+function test_start_error()
+  local auth2 = zauth.new(ctx)
+  local ok, err = auth2:start()
+  assert( not ok )
 end
 
 end

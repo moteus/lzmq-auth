@@ -33,9 +33,40 @@ end
 
 function zauth:start()
   if not self:started() then
-    local thread, pipe = zthreads.fork(self.private_.ctx, 'require "lzmq.impl.auth_zap"(...)')
+    local thread, pipe = zthreads.fork(self.private_.ctx, [[
+      local ctx  = require "lzmq.threads".get_parent_ctx()
+      local pipe = ...
+      local ok, err = pcall(function(...)
+        require "lzmq.impl.auth_zap"(...)
+      end, ...)
+      if not ok then
+        if not pipe:closed() then
+          pipe:sendx("ERROR", tostring(err))
+        end
+        ctx:destroy(200)
+      end
+    ]])
     if not thread then return nil, pipe end
     thread:start()
+    local ok, err = pipe:recvx()
+
+    if not ok then -- thread terminate
+      if not pipe:closed() then
+        pipe:send('TERMINATE') -- just in case
+      end
+      thread:join()
+      pipe:close()
+      return nil, err
+    end
+
+    if ok == 'ERROR' then
+      thread:join()
+      pipe:close()
+      return nil, err
+    end
+
+    assert(ok == 'OK')
+
     self.private_.thread, self.private_.pipe = thread, pipe
   end
   return true
@@ -128,12 +159,17 @@ local TESTDIR = ".test_zauth"
 
 local function test_impl(auth, verbose)
   local path  = require "path"
-  local zcert = require "cert"
+  local zcert = require "lzmq.cert"
 
   local ctx = assert(auth:context())
 
-  auth:start()
+  assert(auth:start())
   auth:verbose(verbose)
+
+  local a2 = zauth:new(ctx)
+  local ok, err = a2:start()
+  assert( not ok )
+  a2:destroy()
 
   local server  = ctx:socket(zmq.PUSH)
   local client  = ctx:socket(zmq.PULL)
