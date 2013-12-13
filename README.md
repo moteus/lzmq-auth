@@ -2,7 +2,8 @@ lzmq-auth
 =========
 [![Build Status](https://travis-ci.org/moteus/lzmq-auth.png?branch=master)](https://travis-ci.org/moteus/lzmq-auth)
 
-Implementaion of czmq zauth class
+Implementaion of [czmq zauth](http://czmq.zeromq.org/manual:zauth) class.<br/>
+For now lzmq-auth does not support automatic reload password and certificates files.
 
 ###Usage
 ```lua
