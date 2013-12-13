@@ -5,6 +5,20 @@ lzmq-auth
 Implementaion of [czmq zauth](http://czmq.zeromq.org/manual:zauth) class.<br/>
 For now lzmq-auth does not support automatic reload password and certificates files.
 
+###Install
+
+Using LuaRocks:
+
+You need install `lzmq` or `lzmq-ffi` (>3.1).
+To support unit test and CURVE certificate directory you need [lua-path](https://github.com/moteus/lua-path) module.
+
+```
+luarocks install lzmq
+luarocks install lzmq-auth
+luarocks install lua-path
+luarocks install luafilesystem
+```
+
 ###Usage
 ```lua
 local zmq   = require "lzmq"
