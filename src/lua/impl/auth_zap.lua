@@ -1,9 +1,16 @@
 return function (...)
 
+local function prequire(...)
+  local ok, mod = pcall(require, ...)
+  if ok then return mod end
+  return nil, mod
+end
+
 local zmq      = require "lzmq"
 local zloop    = require "lzmq.loop"
 local zcert    = require "lzmq.cert"
 local ctx      = require "lzmq.threads".get_parent_ctx()
+local path     = prequire "path"
 local pipe     = ...
 
 local CURVE_ALLOW_ANY = "*"
@@ -23,8 +30,13 @@ local function log(...)
 end
 
 local function load_certificates(location)
-  local path = require "path"
   local res = {}
+
+  if not (path and path.each) then
+    log("E: module `path` not found")
+    return res
+  end
+
   path.each(path.join(location, "*.key"), function(f)
     if f:sub(-11) ~= ".key_secret" then
       local cert = zcert.load(f)
