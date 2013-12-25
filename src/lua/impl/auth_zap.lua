@@ -67,7 +67,7 @@ end
 
 local function recv_zap(sok)
   local msg, err = sok:recv_all()
-  if not msg then return err end
+  if not msg then return nil, err end
   local req = {
     version    = msg[1]; -- Version number, must be "1.0"
     sequence   = msg[2]; -- Sequence number of request
