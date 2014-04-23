@@ -218,7 +218,7 @@ function zcert_load(...)
   )
 end
 
-function zcert_save_public(self, f)
+local function zcert_save_public(self, f)
   write_comment (f, "**** Generated on ", tostring(os.date()), " by LZMQ ****")
   write_comment (f, "ZeroMQ CURVE Public Certificate")
   write_comment (f, "Exchange securely, or use a secure mechanism to verify the contents")
@@ -233,7 +233,7 @@ function zcert_save_public(self, f)
   return true
 end
 
-function zcert_save_secret(self, f)
+local function zcert_save_secret(self, f)
   write_comment (f, "**** Generated on ", tostring(os.date()), " by LZMQ ****")
   write_comment (f, "ZeroMQ CURVE **Secret** Certificate");
   write_comment (f, "DO NOT PROVIDE THIS FILE TO OTHER USERS nor change its permissions.");

@@ -140,7 +140,7 @@ local function auth_curve(domain, client_key)
 
   if certs[domain] then
     -- convert binary key to z85 text
-    z85_client_key = zmq.z85_encode(client_key)
+    local z85_client_key = zmq.z85_encode(client_key)
     if certs[domain][z85_client_key] then
       allow, reason = true, "OK"
     else
