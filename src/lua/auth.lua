@@ -32,20 +32,22 @@ function zauth:context()
 end
 
 function zauth:start()
-  if not self:started() then
-    local thread, pipe = zthreads.fork(self.private_.ctx, [[
-      local ctx  = require "lzmq.threads".get_parent_ctx()
-      local pipe = ...
-      local ok, err = pcall(function(...)
-        require "lzmq.impl.auth_zap"(...)
-      end, ...)
-      if not ok then
-        if not pipe:closed() then
-          pipe:sendx("ERROR", tostring(err))
-        end
-        ctx:destroy(200)
+  local proc = string.dump(function(...)
+    local pipe = ...
+    local ctx  = pipe:context()
+    local ok, err = pcall(function(...)
+      require "lzmq.impl.auth_zap"(...)
+    end, ...)
+    if not ok then
+      if not pipe:closed() then
+        pipe:sendx("ERROR", tostring(err))
       end
-    ]])
+      ctx:destroy(200)
+    end
+  end)
+
+  if not self:started() then
+    local thread, pipe = zthreads.fork(self.private_.ctx, proc)
     if not thread then return nil, pipe end
     thread:start()
     local ok, err = pipe:recvx()
